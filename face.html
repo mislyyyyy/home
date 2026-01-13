@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 동물상 테스트</title>
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+        }
+
+        .description {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        /* 업로드 영역 */
+        #drop-zone {
+            width: 100%;
+            height: 220px;
+            border: 2px dashed var(--secondary-color);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #fafaff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #drop-zone.dragover {
+            background-color: #efebff;
+            border-color: var(--primary-color);
+            transform: scale(1.01);
+        }
+
+        #drop-zone p {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-top: 10px;
+        }
+
+        #preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+        }
+
+        /* 분석 버튼 */
+        .btn-analyze {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: none; /* 초기 숨김 */
+        }
+
+        .btn-analyze:hover {
+            background-color: #5641e6;
+        }
+
+        .btn-analyze:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 결과 영역 */
+        #result-area {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .result-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-sub);
+        }
+
+        .animal-name {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: block;
+            font-weight: 800;
+        }
+
+        .animal-desc {
+            line-height: 1.5;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            background: #f8f7ff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 로딩 바 */
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .reset-btn {
+            margin-top: 15px;
+            background: none;
+            border: 1px solid #ddd;
+            color: var(--text-sub);
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-card">
+            <h1>🐾 AI 동물상 테스트</h1>
+            <p class="description">당신의 사진을 올려 닮은 동물을 확인하세요!</p>
+
+            <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div id="upload-content">
+                    <div class="upload-icon">🖼️</div>
+                    <p>사진을 드래그하거나 클릭하세요</p>
+                </div>
+                <img id="preview-img" alt="미리보기">
+            </div>
+            
+            <input type="file" id="file-input" accept="image/*">
+
+            <button id="analyze-btn" class="btn-analyze">결과 확인하기</button>
+
+            <div id="loader" class="loader"></div>
+
+            <div id="result-area">
+                <div class="result-title">나의 동물상은?</div>
+                <span id="animal-name" class="animal-name">강아지상</span>
+                <p id="animal-desc" class="animal-desc">설명이 여기에 표시됩니다.</p>
+                <button class="reset-btn" onclick="location.reload()">다시 하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewImg = document.getElementById('preview-img');
+        const uploadContent = document.getElementById('upload-content');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resultArea = document.getElementById('result-area');
+        const loader = document.getElementById('loader');
+
+        const animals = [
+            { name: "강아지상 🐶", desc: "당신은 따뜻하고 친근한 인상을 가진 강아지상을 닮았네요! 사람들에게 편안함과 웃음을 주는 매력이 넘치는 스타일입니다." },
+            { name: "고양이상 🐱", desc: "도도하면서도 세련된 분위기의 고양이상을 닮으셨군요! 가만히 있어도 느껴지는 신비로운 아우라가 매력 포인트입니다." },
+            { name: "사슴상 🦌", desc: "맑고 선한 분위기가 흐르는 사슴상입니다! 우아하고 차분한 인상 덕분에 주변 사람들에게 신뢰감을 주는 스타일이에요." },
+            { name: "여우상 🦊", desc: "영리하고 지적인 느낌이 강한 여우상이네요! 매혹적인 눈빛과 개성 있는 분위기로 사람들의 시선을 사로잡는 매력이 있습니다." },
+            { name: "토끼상 🐰", desc: "귀엽고 상큼한 매력의 토끼상이시네요! 보는 사람까지 기분 좋게 만드는 밝은 에너지를 가지고 계십니다." },
+            { name: "곰상 🐻", desc: "듬직하고 포근한 인상을 주는 곰상이네요! 믿음직스러운 이미지와 따뜻한 마음씨가 느껴지는 편안한 스타일입니다." }
+        ];
+
+        // 드래그&드롭 효과
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFile(files[0]);
+        });
+
+        // 파일 선택 시
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 올려주세요!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                uploadContent.style.display = 'none';
+                analyzeBtn.style.display = 'block';
+                resultArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 분석 버튼 클릭
+        analyzeBtn.addEventListener('click', () => {
+            analyzeBtn.style.display = 'none';
+            loader.style.display = 'block';
+
+            // 1.2초 후 결과 표시 (랜덤)
+            setTimeout(() => {
+                const res = animals[Math.floor(Math.random() * animals.length)];
+                
+                document.getElementById('animal-name').innerText = res.name;
+                document.getElementById('animal-desc').innerText = res.desc;
+
+                loader.style.display = 'none';
+                resultArea.style.display = 'block';
+                resultArea.scrollIntoView({ behavior: 'smooth' });
+            }, 1200);
+        });
+    </script>
+</body>
+</html>

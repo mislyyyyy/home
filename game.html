@@ -38,12 +38,13 @@
         h1 { font-size: 60px; margin-bottom: 20px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff; }
         p { font-size: 20px; color: #ddd; margin-bottom: 40px; }
         
-        button {
+        .game-btn {
             background: transparent; color: #00ffff; border: 2px solid #00ffff;
             padding: 15px 40px; font-size: 24px; font-family: inherit; cursor: pointer;
             box-shadow: 0 0 15px #00ffff; transition: all 0.2s; text-transform: uppercase;
+            display: inline-block;
         }
-        button:hover { background: #00ffff; color: #000; box-shadow: 0 0 30px #00ffff; }
+        .game-btn:hover { background: #00ffff; color: #000; box-shadow: 0 0 30px #00ffff; }
 
         .scanlines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -91,13 +92,13 @@
     <div id="startScreen" class="overlay">
         <h1>NEON CRISIS DX</h1>
         <p>ARROWS to Move | SPACE to Shoot/Start</p>
-        <button onclick="startGame()">INSERT COIN</button>
+        <div class="game-btn" onclick="startGame()">INSERT COIN</div>
     </div>
 
     <div id="gameOverScreen" class="overlay hidden">
         <h1 style="color: #ff0055; text-shadow: 4px 4px 0px #ffffff;">GAME OVER</h1>
         <p>FINAL SCORE: <span id="finalScore">0</span></p>
-        <button onclick="restartGame()">TRY AGAIN</button>
+        <div class="game-btn" onclick="restartGame()">TRY AGAIN</div>
     </div>
 </div>
 
@@ -880,6 +881,16 @@
     }
 
     window.addEventListener('blur', () => { Object.keys(keys).forEach(k => keys[k] = false); });
+
+    // Prevent default on all phases
+    ['keydown', 'keyup', 'keypress'].forEach(type => {
+        document.addEventListener(type, e => {
+            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code) || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, { capture: true });
+    });
 
     document.addEventListener('keydown', e => {
         // Robust key tracking
