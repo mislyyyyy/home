@@ -13,29 +13,36 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5; /* 연한 회색 배경 */
+            background-image: url('background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
+            flex-direction: column; /* 푸터 배치를 위해 컬럼 방향 수정 */
             justify-content: center;
             align-items: center;
             padding: 20px;
+            /* 푸터 높이만큼 하단 여백 확보 (내용이 가려지지 않게) */
+            padding-bottom: 180px; 
         }
 
         .container {
             display: flex;
             gap: 30px;
-            flex-wrap: wrap; /* 화면이 작아지면 줄바꿈 */
+            flex-wrap: wrap;
             justify-content: center;
             width: 100%;
             max-width: 1200px;
+            z-index: 1; /* 푸터보다 뒤에 위치하지만 배경보단 위에 */
         }
 
         .card {
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.9);
             width: 320px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden; /* 이미지가 둥근 모서리를 넘치지 않게 함 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             transition: transform 0.2s ease;
@@ -61,16 +68,17 @@
         }
 
         .card-text {
-            color: #555;
-            font-size: 16px;
+            color: #000;
+            font-size: 18px;
             line-height: 1.6;
             margin-bottom: 25px;
             flex-grow: 1;
+            font-weight: 500;
         }
 
         .btn {
             display: inline-block;
-            background-color: #007bff; /* 파란색 계열 */
+            background-color: #483D8B;
             color: white;
             padding: 12px 24px;
             text-decoration: none;
@@ -80,14 +88,168 @@
         }
 
         .btn:hover {
-            background-color: #0056b3; /* 호버 시 더 어두운 파란색 */
+            background-color: #2e285a;
         }
 
-        /* 반응형 처리: 화면이 좁아지면 카드가 세로로 정렬됨 */
         @media (max-width: 768px) {
             .card {
                 width: 100%;
                 max-width: 400px;
+            }
+        }
+
+        /* 
+         * =========================================
+         * Soft Cyberpunk Footer Styles
+         * =========================================
+         */
+        .cyber-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            /* 배경: 흰색 베이스 + 투명도 30% */
+            background: rgba(255, 255, 255, 0.3);
+            /* 블러 효과로 뒷 배경이 은은하게 비침 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            /* 상단에 아주 얇은 네온 퍼플 라인 */
+            border-top: 1px solid rgba(155, 108, 255, 0.4);
+            padding: 25px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1000;
+            font-family: 'Courier New', Courier, monospace; /* 테크니컬한 무드 */
+            transition: all 0.5s ease;
+        }
+
+        /* 상단 영역 (좌: 텍스트 / 우: 아이콘) */
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 좌측 텍스트 영역 */
+        .footer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .creator-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .creator-name::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #9b6cff; /* 네온 퍼플 포인트 */
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 8px rgba(155, 108, 255, 0.6);
+        }
+
+        .cyber-quote {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
+
+        /* 우측 Gmail 아이콘 영역 */
+        .footer-contact {
+            display: flex;
+            align-items: center;
+        }
+
+        .gmail-link {
+            display: inline-block;
+            color: #333;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 10px;
+        }
+
+        .gmail-icon {
+            width: 32px;
+            height: 32px;
+            stroke: #333;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.4s ease;
+        }
+
+        /* Hover 효과: 아이콘 확대 + 네온 글로우 */
+        .gmail-link:hover {
+            transform: scale(1.15);
+        }
+
+        .gmail-link:hover .gmail-icon {
+            stroke: #9b6cff; /* 네온 퍼플 */
+            filter: drop-shadow(0 0 5px rgba(155, 108, 255, 0.8));
+        }
+
+        /* 하단 카피라이트 영역 */
+        .footer-bottom {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            color: #9b6cff;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; text-shadow: 0 0 0 rgba(155, 108, 255, 0); }
+            50% { opacity: 1; text-shadow: 0 0 10px rgba(155, 108, 255, 0.8); }
+            100% { opacity: 0.4; text-shadow: 0 0 0 rgba(155, 108, 255, 0); }
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 600px) {
+            .footer-top {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .creator-name {
+                justify-content: center;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            body {
+                padding-bottom: 220px; /* 모바일에서 더 많은 여백 확보 */
             }
         }
     </style>
@@ -97,18 +259,18 @@
     <div class="container">
         <!-- 첫 번째 카드 -->
         <div class="card">
-            <img src="gameimage12.png" alt="Tech Image" class="card-image">
+            <img src="gameimage12.png" alt="Game Image" class="card-image">
             <div class="card-body">
-                <p class="card-text">최신 기술 트렌드와 IT 뉴스를 제공하는 테크 포털입니다. 혁신적인 아이디어를 만나보세요.</p>
+                <p class="card-text">슈팅 게임 하러가기</p>
                 <a href="./game.html" class="btn">접속하기</a>
             </div>
         </div>
 
         <!-- 두 번째 카드 -->
         <div class="card">
-            <img src="faceimage.png" alt="Design Image" class="card-image">
+            <img src="faceimage.png" alt="Face Image" class="card-image">
             <div class="card-body">
-                <p class="card-text">감각적인 디자인 영감과 포트폴리오를 공유하는 디자인 커뮤니티입니다.</p>
+                <p class="card-text">나는 무슨 동물상인지 알아보러 가기</p>
                 <a href="./face.html" class="btn">접속하기</a>
             </div>
         </div>
@@ -117,11 +279,43 @@
         <div class="card">
             <img src="mealimage12.png" alt="Meal Image" class="card-image">
             <div class="card-body">
-                <p class="card-text">오늘의 급식 메뉴와 영양 정보를 확인하고 건강한 식단을 확인해 보세요.</p>
-                <a href="./meal.html" class="btn">조회하기</a>
+                <p class="card-text">하동여고 급식 메뉴 보러가기</p>
+                <a href="./meal.html" class="btn">접속하기</a>
             </div>
         </div>
     </div>
+
+    <!-- Soft Cyberpunk Footer -->
+    <footer class="cyber-footer">
+        <div class="footer-top">
+            <!-- 좌측 정보 영역 -->
+            <div class="footer-info">
+                <div class="creator-name">제작자 | 송미셜</div>
+                <p class="cyber-quote">
+                    Signals in the digital night.<br>
+                    Connected by light, built with code.
+                </p>
+            </div>
+
+            <!-- 우측 컨택트 영역 (Gmail) -->
+            <div class="footer-contact">
+                <a href="mailto:misyeals@gmail.com" class="gmail-link" aria-label="Send Email">
+                    <!-- Minimal Line-style Gmail Icon SVG -->
+                    <svg class="gmail-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- 하단 상태/카피라이트 영역 -->
+        <div class="footer-bottom">
+            <span>© 2026 Song Michel</span>
+            <span>Soft cyberpunk interface for human-centered web</span>
+            <span>Built in silence, glowing <span class="status-dot">ONLINE</span></span>
+        </div>
+    </footer>
 
 </body>
 </html>

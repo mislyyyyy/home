@@ -15,7 +15,7 @@
             --text-color: #333;
         }
         body {
-            font-family: 'Jua', sans-serif; /* 둥근 폰트 적용 */
+            font-family: 'Jua', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -29,12 +29,10 @@
             background-attachment: fixed;
             background-size: cover;
         }
-        /* 배경이 어두울 수 있으므로 가독성을 위한 오버레이 레이어 (선택 사항, 여기선 생략하고 카드에 불투명도 적용) */
         
         .container {
             max-width: 800px;
             width: 100%;
-            /* 컨테이너도 약간 투명하게 */
             background: rgba(255, 255, 255, 0.8);
             padding: 30px;
             border-radius: 20px;
@@ -44,14 +42,14 @@
         h1 {
             text-align: center;
             color: var(--primary-color);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             font-size: 2.5em;
         }
         .search-box {
             display: flex;
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             justify-content: center;
             flex-wrap: wrap;
         }
@@ -63,7 +61,7 @@
             font-family: 'Jua', sans-serif;
             outline: none;
         }
-        button {
+        button.search-btn {
             padding: 10px 25px;
             background-color: var(--primary-color);
             color: white;
@@ -75,9 +73,37 @@
             transition: transform 0.2s, background 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        button:hover {
+        button.search-btn:hover {
             background-color: #357abd;
             transform: translateY(-2px);
+        }
+
+        /* 필터 버튼 스타일 */
+        .filter-box {
+            display: none; /* 데이터 로드 전엔 숨김 */
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        .filter-btn {
+            padding: 8px 25px;
+            background-color: #fff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            font-family: 'Jua', sans-serif;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+        .filter-btn:hover {
+            background-color: #e3f2fd;
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* 결과 영역 그리드 레이아웃 */
@@ -91,8 +117,14 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            animation: fadeIn 0.5s ease;
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .meal-header {
             font-size: 1.8em;
             color: #333;
@@ -180,6 +212,7 @@
             display: none;
             font-size: 1.5em;
             color: var(--primary-color);
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -190,7 +223,13 @@
     
     <div class="search-box">
         <input type="date" id="dateInput">
-        <button onclick="fetchMeal()">조회하기</button>
+        <button onclick="fetchMeal()" class="search-btn">조회하기</button>
+    </div>
+
+    <!-- 필터 버튼 (데이터 로드 후 보임, 전체 버튼 제거됨) -->
+    <div class="filter-box" id="filterBox">
+        <button onclick="changeFilter('중식')" class="filter-btn" id="btnLunch">중식</button>
+        <button onclick="changeFilter('석식')" class="filter-btn" id="btnDinner">석식</button>
     </div>
 
     <div id="loading">맛있는 급식 정보를 가져오는 중...</div>
@@ -198,6 +237,10 @@
 </div>
 
 <script>
+    // 전역 변수로 데이터 저장
+    let currentMealData = [];
+    let currentDisplayDate = "";
+
     // 기본 날짜 설정 (오늘)
     const today = new Date();
     const formattedToday = today.toISOString().split('T')[0];
@@ -208,14 +251,23 @@
         const date = dateInputVal.replace(/-/g, '');
         const resultDiv = document.getElementById('result');
         const loading = document.getElementById('loading');
+        const filterBox = document.getElementById('filterBox');
         
         const KEY = '7e9e7a950e6544da971fe8f43f6b9aa1';
         const ATPT_CODE = 'S10';
         const SCHUL_CODE = '9010120';
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_CODE}&SD_SCHUL_CODE=${SCHUL_CODE}&MLSV_YMD=${date}`;
 
+        // 초기화
         resultDiv.innerHTML = '';
+        currentMealData = [];
+        filterBox.style.display = 'none';
         loading.style.display = 'block';
+
+        // 날짜 텍스트 생성
+        const dateObj = new Date(dateInputVal);
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        currentDisplayDate = `${dateInputVal} (${days[dateObj.getDay()]})`;
 
         try {
             const response = await fetch(url);
@@ -223,62 +275,84 @@
 
             loading.style.display = 'none';
 
-            // 1. 날짜 카드 생성 (최상단)
-            const dateObj = new Date(dateInputVal);
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            const formattedDate = `${dateInputVal} (${days[dateObj.getDay()]})`;
-
-            const dateCardHtml = `
-                <div class="info-card date-card">
-                    <h4>날짜</h4>
-                    <div class="content">${formattedDate}</div>
-                </div>
-            `;
-            resultDiv.innerHTML += dateCardHtml;
-
             if (data.mealServiceDietInfo) {
-                const meals = data.mealServiceDietInfo[1].row;
-                let foundMeal = false;
-
-                // 중식, 석식 순회
-                meals.forEach(meal => {
-                    if (meal.MMEAL_SC_NM === '중식' || meal.MMEAL_SC_NM === '석식') {
-                        foundMeal = true;
-                        
-                        // 메뉴 정제
-                        const menu = meal.DDISH_NM.replace(/<br\/>/g, '\n').replace(/\([0-9.]+\)/g, '');
-
-                        // HTML 구조 생성 (섹션 -> 메뉴카드, 칼로리카드)
-                        const sectionHtml = `
-                            <div class="meal-section">
-                                <div class="meal-header">${meal.MMEAL_SC_NM}</div>
-                                <div class="cards-row">
-                                    <div class="info-card menu-card">
-                                        <h4>오늘의 메뉴</h4>
-                                        <div class="content">${menu}</div>
-                                    </div>
-                                    <div class="info-card cal-card">
-                                        <h4>칼로리</h4>
-                                        <div class="content">${meal.CAL_INFO}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        resultDiv.innerHTML += sectionHtml;
-                    }
-                });
-
-                if (!foundMeal) {
-                    resultDiv.innerHTML += '<div class="error">해당 날짜에 중식/석식 정보가 없습니다.</div>';
-                }
+                // 데이터 저장
+                currentMealData = data.mealServiceDietInfo[1].row;
+                // 필터 버튼 표시
+                filterBox.style.display = 'flex';
+                // 기본적으로 '중식' 먼저 보여주기
+                changeFilter('중식');
             } else {
                 const msg = data.RESULT ? data.RESULT.MESSAGE : '급식 정보가 없습니다.';
+                renderDateCard(resultDiv);
                 resultDiv.innerHTML += `<div class="error">${msg}</div>`;
             }
         } catch (error) {
             loading.style.display = 'none';
-            resultDiv.innerHTML = '<div class="error">데이터를 가져오는 중 오류가 발생했습니다.</div>';
+            renderDateCard(resultDiv);
+            resultDiv.innerHTML += '<div class="error">데이터를 가져오는 중 오류가 발생했습니다.</div>';
             console.error(error);
+        }
+    }
+
+    function changeFilter(type) {
+        // 버튼 스타일 업데이트
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        if(type === '중식') document.getElementById('btnLunch').classList.add('active');
+        if(type === '석식') document.getElementById('btnDinner').classList.add('active');
+
+        renderMeals(type);
+    }
+
+    function renderDateCard(container) {
+        const dateCardHtml = `
+            <div class="info-card date-card">
+                <h4>날짜</h4>
+                <div class="content">${currentDisplayDate}</div>
+            </div>
+        `;
+        container.innerHTML = dateCardHtml;
+    }
+
+    function renderMeals(filterType) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = ''; // 초기화
+
+        // 1. 날짜 카드 생성
+        renderDateCard(resultDiv);
+
+        let foundMeal = false;
+
+        // 2. 데이터 순회 및 필터링
+        currentMealData.forEach(meal => {
+            // 필터 적용
+            if (meal.MMEAL_SC_NM === filterType) {
+                foundMeal = true;
+                
+                // 메뉴 정제
+                const menu = meal.DDISH_NM.replace(/<br\/>/g, '\n').replace(/\([0-9.]+\)/g, '');
+
+                const sectionHtml = `
+                    <div class="meal-section">
+                        <div class="meal-header">${meal.MMEAL_SC_NM}</div>
+                        <div class="cards-row">
+                            <div class="info-card menu-card">
+                                <h4>오늘의 메뉴</h4>
+                                <div class="content">${menu}</div>
+                            </div>
+                            <div class="info-card cal-card">
+                                <h4>칼로리</h4>
+                                <div class="content">${meal.CAL_INFO}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultDiv.innerHTML += sectionHtml;
+            }
+        });
+
+        if (!foundMeal) {
+            resultDiv.innerHTML += `<div class="error">'${filterType}' 정보가 없습니다.</div>`;
         }
     }
 
