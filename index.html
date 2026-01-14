@@ -231,25 +231,50 @@
 
         /* 모바일 반응형 */
         @media (max-width: 600px) {
+            .cyber-footer {
+                height: 15vh; /* 화면의 15% 차지 */
+                padding: 10px 20px;
+                gap: 5px;
+                justify-content: center; /* 세로 중앙 정렬 */
+            }
+
             .footer-top {
-                flex-direction: column;
-                gap: 20px;
+                flex-direction: row; /* 모바일에서도 좌우 배치 유지하여 공간 절약 */
+                gap: 10px;
                 align-items: center;
-                text-align: center;
+                text-align: left;
             }
             
             .creator-name {
-                justify-content: center;
+                justify-content: flex-start;
+                font-size: 12px;
+                margin-bottom: 2px;
+            }
+
+            .cyber-quote {
+                font-size: 11px;
+                line-height: 1.2;
+            }
+
+            .gmail-icon {
+                width: 24px;
+                height: 24px;
             }
 
             .footer-bottom {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
+                flex-direction: row; /* 한 줄로 표시 */
+                gap: 5px;
+                font-size: 9px;
+                padding-top: 8px;
+                justify-content: space-between;
+            }
+
+            .footer-bottom span:nth-child(2) {
+                display: none; /* 공간 확보를 위해 중간 문구 숨김 */
             }
             
             body {
-                padding-bottom: 220px; /* 모바일에서 더 많은 여백 확보 */
+                padding-bottom: 16vh; /* 푸터 높이에 맞춘 여백 */
             }
         }
     </style>
